@@ -3,10 +3,12 @@ import requests
 import re
 
 M3U_URL = "https://iptv-emw.pages.dev/live/m3u/tvmalaysia.live.m3u"
-LOGO_DIR = "logos"
+LOGO_DIR = "img"  # 保存到 img 文件夹
 
+# 创建 img 目录（如果不存在）
 os.makedirs(LOGO_DIR, exist_ok=True)
 
+# 获取 M3U 内容
 response = requests.get(M3U_URL)
 lines = response.text.splitlines()
 
@@ -17,9 +19,18 @@ for line in lines:
 
         if match and name_match:
             logo_url = match.group(1)
-            channel_name = name_match.group(1).strip().replace("/", "_")  # 避免非法文件名
+            if not logo_url.startswith("http"):
+                continue  # 跳过无效 URL
+
+            # 清理频道名作为文件名，防止非法字符
+            channel_name = name_match.group(1).strip().replace("/", "_")
             ext = os.path.splitext(logo_url)[-1] or ".jpg"
             file_path = os.path.join(LOGO_DIR, f"{channel_name}{ext}")
+
+            # 跳过已存在的文件，避免重复下载
+            if os.path.exists(file_path):
+                print(f"Already exists: {channel_name}")
+                continue
 
             try:
                 img_data = requests.get(logo_url, timeout=10).content
