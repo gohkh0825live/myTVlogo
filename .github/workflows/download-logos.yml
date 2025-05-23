@@ -1,0 +1,33 @@
+name: Download Channel Logos
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # 每天凌晨2点运行
+  workflow_dispatch:
+
+jobs:
+  download-logos:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: pip install requests
+
+    - name: Run logo downloader
+      run: python download_logos.py
+
+    - name: Commit and push
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git add logos/
+        git commit -m "Update channel logos" || echo "No changes"
+        git push
