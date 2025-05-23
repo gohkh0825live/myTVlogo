@@ -1,33 +1,52 @@
-name: Download Channel Logos
+name: 'Update schedule'
 
 on:
-  schedule:
-    - cron: '0 2 * * *' # 每天凌晨 2 点执行
   workflow_dispatch:
-
+    branches:
+      - main
+  push:
+    branches:
+      - main
 jobs:
-  download-logos:
-    runs-on: ubuntu-latest
-
+  push:
+    runs-on: ${{ matrix.operating-system }}
+    timeout-minutes: 240
+    strategy:
+      matrix:
+        operating-system: [ 'ubuntu-latest' ]
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.x'
-
-    - name: Install dependencies
-      run: pip install requests pillow
-
-    - name: Run logo downloader
-      run: python download_logos.py
-
-    - name: Commit and push
-      run: |
-        git config user.name "GitHub Actions"
-        git config user.email "actions@github.com"
-        git add img/
-        git commit -m "Update channel logos" || echo "No changes"
-        git push
+      - uses: actions/checkout@v3
+      - name: Run with setup-python 3.13
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+          update-environment: true
+          cache: 'pipenv'
+      - name: Install pipenv
+        run: pip3 install --user pipenv
+      - name: Install dependecies
+        run: |
+          pipenv lock
+          pipenv --python 3.13 && pipenv install --deploy
+      - name: Update LOGO
+        run: pipenv run logo
+      - name: Commit and push if changed
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add .
+          if ! git diff --staged --quiet; then
+            git commit -m "Github Action Auto Updated"
+            git push --force
+          fi
+      - name: Mirror the Github organization repos to Gitee.
+        uses: Yikun/hub-mirror-action@master
+        with:
+          src: 'github/mytv-android'    			
+          dst: 'gitee/mytv-android'   
+          dst_key: ${{ secrets.GITEE_PRIVATE_KEY }}  
+          dst_token:  ${{ secrets.GITEE_TOKEN }}  
+          force_update: true
+          static_list: "myTVlogo"
+          account_type: org   		
+          debug: true
