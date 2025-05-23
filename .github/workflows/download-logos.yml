@@ -28,6 +28,6 @@ jobs:
       run: |
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
-        git add logos/
+        git add img/
         git commit -m "Update channel logos" || echo "No changes"
         git push
