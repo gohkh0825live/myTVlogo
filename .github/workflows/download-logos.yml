@@ -2,7 +2,7 @@ name: Download Channel Logos
 
 on:
   schedule:
-    - cron: '0 2 * * *' # 每天凌晨2点运行
+    - cron: '0 2 * * *' # 每天凌晨 2 点执行
   workflow_dispatch:
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
         python-version: '3.x'
 
     - name: Install dependencies
-      run: pip install requests
+      run: pip install requests pillow
 
     - name: Run logo downloader
       run: python download_logos.py
@@ -28,6 +28,6 @@ jobs:
       run: |
         git config user.name "GitHub Actions"
         git config user.email "actions@github.com"
-        git add -A
+        git add img/
         git commit -m "Update channel logos" || echo "No changes"
         git push
