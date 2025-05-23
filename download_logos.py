@@ -18,4 +18,18 @@ for line in lines:
         if match and name_match:
             logo_url = match.group(1)
             channel_name = name_match.group(1).strip().replace("/", "_")
-            ext = os.path.splitext(logo_url)[-1]()_
+
+            # 安全获取文件扩展名
+            ext = os.path.splitext(logo_url)[-1]
+            if not ext or not ext.startswith("."):
+                ext = ".png"
+
+            file_path = os.path.join(IMG_DIR, f"{channel_name}{ext}")
+
+            try:
+                img_data = requests.get(logo_url, timeout=10).content
+                with open(file_path, "wb") as f:
+                    f.write(img_data)
+                print(f"Downloaded: {channel_name}")
+            except Exception as e:
+                print(f"Failed to download logo for {channel_name}: {e}")
