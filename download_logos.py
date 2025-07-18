@@ -5,7 +5,7 @@ from io import BytesIO
 from PIL import Image
 
 # 配置
-M3U_URL = "https://perfecttv.net/PerfecttvFree.m3u"
+M3U_URL = "https://iptv-web.gohkh9.us.kg/1.m3u"
 LOGO_DIR = "img"
 HEADERS = {
     "User-Agent": "Mozilla/5.0"
